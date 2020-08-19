@@ -61,3 +61,4 @@
 
 - name: Install Helm diff plugin
   command: "helm plugin install {{ helm_diff_plugin_url }}"
+  when: helm_check.stat.exists or helm_download is changed
