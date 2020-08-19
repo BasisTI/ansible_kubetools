@@ -1,0 +1,8 @@
+---
+# defaults file for k8s_tools
+kubectl_bin_path: /usr/local/bin/kubectl
+helm_bin_path: /usr/local/bin/helm
+helm_version: v3.3.0
+helmfile_bin_path: /usr/local/bin/helmfile
+helmfile_version: v0.125.7
+helm_diff_plugin_url: https://github.com/databus23/helm-diff
