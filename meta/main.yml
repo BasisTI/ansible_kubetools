@@ -5,9 +5,22 @@ galaxy_info:
   license: Apache-2.0
   min_ansible_version: 2.9
   galaxy_tags:
-    - Kubernetes
-    - Kubectl
-    - Helm
-    - Helmfile
+    - kubernetes
+    - kubectl
+    - helm
+    - helmfile
+  platforms:
+    - name: Centos
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
 
 dependencies: []
