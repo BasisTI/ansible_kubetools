@@ -16,7 +16,7 @@
 
 - name: Install Kubectl
   get_url:
-    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/{{ ansible_architecture }}/kubectl"
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
     dest: "{{ kubectl_bin_path }}"
     mode: "+rx"
 
@@ -33,15 +33,16 @@
 
 - name: Download helm
   unarchive:
-    src: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ ansible_architecture }}.tar.gz"
+    src: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
     dest: /tmp
     remote_src: true
+    mode: "0644"
   register: helm_download
   when: not helm_check.stat.exists or helm_version not in helm_existing_version.stdout
 
 - name: Copy helm binary into place
   copy:
-    src: "/tmp/linux-{{ ansible_architecture }}/helm"
+    src: "/tmp/linux-amd64/helm"
     dest: "{{ helm_bin_path }}"
     mode: 0755
     remote_src: true
@@ -50,12 +51,12 @@
 
 - name: Cleanup tmp
   file:
-    path: "/tmp/linux-{{ ansible_architecture }}"
+    path: "/tmp/linux-amd64"
     state: absent
 
 - name: Install Helmfile
   get_url:
-    url: "https://github.com/roboll/helmfile/releases/download/{{ helmfile_version }}/helmfile_linux_{{ ansible_architecture }}"
+    url: "https://github.com/roboll/helmfile/releases/download/{{ helmfile_version }}/helmfile_linux_amd64"
     dest: "{{ helmfile_bin_path }}"
     mode: "+rx"
 
