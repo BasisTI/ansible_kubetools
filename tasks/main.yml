@@ -1,6 +1,7 @@
 ---
 # tasks file for k8s_tools
 - name: Get stable version of Kubectl
+  become: true
   uri:
     url: "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
     method: GET
@@ -15,12 +16,14 @@
   when: kubectl_version is not defined
 
 - name: Install Kubectl
+  become: true
   get_url:
     url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
     dest: "{{ kubectl_bin_path }}"
     mode: "+rx"
 
 - name: Check if Helm binary exists
+  become: true
   stat:
     path: "{{ helm_bin_path }}"
   register: helm_check
@@ -32,6 +35,7 @@
   register: helm_existing_version
 
 - name: Download helm
+  become: true
   unarchive:
     src: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
     dest: /tmp
@@ -41,25 +45,23 @@
   when: not helm_check.stat.exists or helm_version not in helm_existing_version.stdout
 
 - name: Copy helm binary into place
+  become: true
   copy:
     src: "/tmp/linux-amd64/helm"
     dest: "{{ helm_bin_path }}"
     mode: 0755
     remote_src: true
-  become: true
   when: helm_download is changed
 
-- name: Cleanup tmp
+- name: Cleanup /tmp
+  become: true
   file:
-    path: "/tmp/linux-amd64"
+    path: "/tmp/linux-amd64/"
     state: absent
 
 - name: Install Helmfile
+  become: true
   get_url:
     url: "https://github.com/roboll/helmfile/releases/download/{{ helmfile_version }}/helmfile_linux_amd64"
     dest: "{{ helmfile_bin_path }}"
     mode: "+rx"
-
-- name: Install Helm diff plugin
-  command: "helm plugin install {{ helm_diff_plugin_url }}"
-  when: helm_check.stat.exists or helm_download is changed
