@@ -1,35 +1,40 @@
+# Ansible Role: Kubetools
+
+
+An ansible role that installs kubernetes tools on rhel/centos/fedora and debian/ubuntu. 
+
 ![Ansible Galaxy](https://github.com/BasisTI/ansible_kubetools/workflows/Ansible%20Galaxy/badge.svg)
 
-Ansible Role: Kubetools
-=========
+## Tags:
+## Variables:
 
-An Ansible Role that installs some tools such as kubectl, helm and helmfile on RHEL/CentOS/Fedora and Debian/Ubuntu.
+* `kubectl_bin_path`: `/usr/local/bin/kubectl` - You can specify install path for the kubectl.
 
-Role Variables
---------------
 
-Available variables are listed below, along with default values (see defaults/main.yml):
 
-    kubectl_bin_path: /usr/local/bin/kubectl
-    helm_bin_path: /usr/local/bin/helm
-    helmfile_bin_path: /usr/local/bin/helmfile
+* `helm_bin_path`: `/usr/local/bin/helm` - You can specify install path for the helm.
 
-You can specify install path for the binaries.
 
-    kubectl_version: ''
-    helm_version: v3.3.0
-    helmfile_version: v0.125.7
 
-You can specify the binaries version. If not specified kubectl_version the kubectl tool will be installed with the release version.
+* `kubectl_version`: `` - By default kubectl_version is undefined, it will be get the stable version on the https://storage.googleapis.com/kubernetes-release/release/stable.txt.
 
-Example Playbook
-----------------
 
-    - hosts: servers
-      roles:
-         - { role: basisconfig.kubetools }
 
-License
--------
+* `helm_version`: `v3.3.0` - You can specify the helm version.
 
-BSD
+
+
+* `helmfile_bin_path`: `/usr/local/bin/helmfile` - You can specify install path for the helmfile.
+
+
+
+* `helmfile_version`: `v0.125.7` - You can specify the helmfile version.
+
+
+## License
+Apache-2.0
+
+
+
+Documentation generated using: [Ansible-autodoc](https://github.com/AndresBott/ansible-autodoc)
+
