@@ -32,7 +32,7 @@ An ansible role that installs kubernetes tools on rhel/centos/fedora and debian/
 
 
 ## License
-Apache-2.0
+Mit
 
 
 

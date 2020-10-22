@@ -1,5 +1,5 @@
 ---
-# defaults file for k8s_tools
+# defaults file for kubetools
 # @var kubectl_bin_path: /usr/local/bin/kubectl
 # You can specify install path for the kubectl.
 kubectl_bin_path: /usr/local/bin/kubectl
