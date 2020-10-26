@@ -6,8 +6,8 @@
   register: kubectl_stat
 
 - name: Get kubectl stat
-  shell: >
-    set -o pipefail && \
+  shell: |
+    set -o pipefail
     "{{ kubectl_bin_path }}" version --client --short | awk '{print $NF}'
   args:
     executable: /bin/bash
@@ -75,8 +75,8 @@
   register: helmfile_stat
 
 - name: Check Helmfile version
-  shell: >
-    set -o pipefail && \
+  shell: |
+    set -o pipefail
     "{{ helmfile_bin_path }}" version | awk '{print $NF}'
   args:
     executable: /bin/bash
