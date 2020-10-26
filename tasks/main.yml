@@ -1,6 +1,21 @@
 ---
 # tasks file for kubetools
-- name: Get stable version of Kubectl
+- name: Check if kubectl binary exists
+  stat:
+    path: "{{ kubectl_bin_path }}"
+  register: kubectl_stat
+
+- name: Get kubectl stat
+  shell: >
+    set -o pipefail && \
+    "{{ kubectl_bin_path }}" version --client --short | awk '{print $NF}'
+  args:
+    executable: /bin/bash
+  register: kubectl_existing_version
+  changed_when: False
+  when: kubectl_stat.stat.exists
+
+- name: Get stable version of kubectl
   uri:
     url: "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
     method: GET
@@ -14,47 +29,64 @@
     kubectl_version: "{{ kubectl_release_version.content | replace('\n', '') }}"
   when: kubectl_version is not defined
 
-- name: Install Kubectl
+- name: Install kubectl
   get_url:
     url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
     dest: "{{ kubectl_bin_path }}"
     mode: "+rx"
+    force: "{{ (kubectl_version not in kubectl_existing_version.stdout) | ternary(yes, omit) }}"
 
 - name: Check if Helm binary exists
   stat:
     path: "{{ helm_bin_path }}"
-  register: helm_check
+  register: helm_stat
 
 - name: Check Helm version
   command: "{{ helm_bin_path }} version"
-  failed_when: false
-  changed_when: false
   register: helm_existing_version
+  changed_when: False
+  when: helm_stat.stat.exists
 
 - name: Download helm
   unarchive:
     src: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
     dest: /tmp
-    remote_src: true
-    mode: "0644"
+    remote_src: yes
+    mode: '0644'
   register: helm_download
-  when: not helm_check.stat.exists or helm_version not in helm_existing_version.stdout
+  when: not helm_stat.stat.exists or helm_version not in helm_existing_version.stdout
 
 - name: Copy helm binary into place
   copy:
-    src: "/tmp/linux-amd64/helm"
+    src: /tmp/linux-amd64/helm
     dest: "{{ helm_bin_path }}"
-    mode: 0755
-    remote_src: true
+    mode: '0755'
+    remote_src: yes
   when: helm_download is changed
 
 - name: Cleanup /tmp
   file:
-    path: "/tmp/linux-amd64/"
+    path: /tmp/linux-amd64/
     state: absent
+
+- name: Check if Helmfile binary exists
+  stat:
+    path: "{{ helmfile_bin_path }}"
+  register: helmfile_stat
+
+- name: Check Helmfile version
+  shell: >
+    set -o pipefail && \
+    "{{ helmfile_bin_path }}" version | awk '{print $NF}'
+  args:
+    executable: /bin/bash
+  register: helmfile_existing_version
+  changed_when: False
+  when: helmfile_stat.stat.exists
 
 - name: Install Helmfile
   get_url:
     url: "https://github.com/roboll/helmfile/releases/download/{{ helmfile_version }}/helmfile_linux_amd64"
     dest: "{{ helmfile_bin_path }}"
     mode: "+rx"
+    force: "{{ (helmfile_version not in helmfile_existing_version.stdout) | ternary(yes, omit) }}"
