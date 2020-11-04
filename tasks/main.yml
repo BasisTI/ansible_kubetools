@@ -2,13 +2,13 @@
 # tasks file for kubetools
 - name: Check if kubectl binary exists
   stat:
-    path: "{{ kubectl_bin_path }}"
+    path: /usr/local/bin/kubectl
   register: kubectl_stat
 
 - name: Get kubectl stat
   shell: |
     set -o pipefail
-    "{{ kubectl_bin_path }}" version --client --short | awk '{print $NF}'
+    /usr/local/bin/kubectl version --client --short | awk '{print $NF}'
   args:
     executable: /bin/bash
   register: kubectl_existing_version
@@ -22,44 +22,45 @@
     status_code: 200
     return_content: yes
   register: kubectl_release_version
-  when: kubectl_version is not defined
+  when: kubetools_kubectl_version is not defined
 
-- name: Set kubectl_version variable
+- name: Set kubetools_kubectl_version variable
   set_fact:
-    kubectl_version: "{{ kubectl_release_version.content | replace('\n', '') }}"
-  when: kubectl_version is not defined
+    kubetools_kubectl_version: "{{ kubectl_release_version.content | replace('\n', '') }}"
+  when: kubetools_kubectl_version is not defined
 
 - name: Install kubectl
   get_url:
-    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
-    dest: "{{ kubectl_bin_path }}"
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubetools_kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
     mode: "+rx"
-    force: "{{ (kubectl_version not in kubectl_existing_version.stdout) | ternary(yes, omit) }}"
+    force: yes
+  when: not kubectl_stat.stat.exists or kubetools_kubectl_version not in kubectl_existing_version.stdout
 
 - name: Check if Helm binary exists
   stat:
-    path: "{{ helm_bin_path }}"
+    path: /usr/local/bin/helm
   register: helm_stat
 
 - name: Check Helm version
-  command: "{{ helm_bin_path }} version"
+  command: /usr/local/bin/helm version
   register: helm_existing_version
   changed_when: False
   when: helm_stat.stat.exists
 
 - name: Download helm
   unarchive:
-    src: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
+    src: "https://get.helm.sh/helm-{{ kubetools_helm_version }}-linux-amd64.tar.gz"
     dest: /tmp
     remote_src: yes
     mode: '0644'
   register: helm_download
-  when: not helm_stat.stat.exists or helm_version not in helm_existing_version.stdout
+  when: not helm_stat.stat.exists or kubetools_helm_version not in helm_existing_version.stdout
 
 - name: Copy helm binary into place
   copy:
     src: /tmp/linux-amd64/helm
-    dest: "{{ helm_bin_path }}"
+    dest: /usr/local/bin/helm
     mode: '0755'
     remote_src: yes
   when: helm_download is changed
@@ -71,13 +72,13 @@
 
 - name: Check if Helmfile binary exists
   stat:
-    path: "{{ helmfile_bin_path }}"
+    path: /usr/local/bin/helmfile
   register: helmfile_stat
 
 - name: Check Helmfile version
   shell: |
     set -o pipefail
-    "{{ helmfile_bin_path }}" version | awk '{print $NF}'
+    /usr/local/bin/helmfile version | awk '{print $NF}'
   args:
     executable: /bin/bash
   register: helmfile_existing_version
@@ -86,7 +87,8 @@
 
 - name: Install Helmfile
   get_url:
-    url: "https://github.com/roboll/helmfile/releases/download/{{ helmfile_version }}/helmfile_linux_amd64"
-    dest: "{{ helmfile_bin_path }}"
+    url: "https://github.com/roboll/helmfile/releases/download/{{ kubetools_helmfile_version }}/helmfile_linux_amd64"
+    dest: /usr/local/bin/helmfile
     mode: "+rx"
-    force: "{{ (helmfile_version not in helmfile_existing_version.stdout) | ternary(yes, omit) }}"
+    force: yes
+  when: not helmfile_stat.stat.exists or kubetools_helmfile_version not in helmfile_existing_version.stdout
